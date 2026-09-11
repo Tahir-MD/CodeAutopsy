@@ -1,13 +1,3 @@
-"""
-CodeAutopsy - Streamlit Control Panel
-=======================================
-Live demo UI: paste a build/error log, point at a GitHub repo, watch
-an AI diagnose the bug, review the proposed fix, and (optionally)
-open a real Pull Request with one click.
-
-Run locally:  streamlit run app.py
-"""
-
 import os
 import difflib
 import streamlit as st

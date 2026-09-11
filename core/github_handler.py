@@ -1,11 +1,3 @@
-"""
-github_handler.py
--------------------
-Handles all Git + GitHub operations: cloning the repo, writing the fix
-to disk, committing on a new branch, pushing, and opening a Pull
-Request via the GitHub REST API (through PyGithub).
-"""
-
 import os
 import shutil
 import subprocess
@@ -15,7 +7,6 @@ from github import Github, Auth
 
 
 def clone_repo(repo_full_name: str, token: str) -> str:
-    """Clones repo into a temp dir using an authenticated HTTPS URL. Returns local path."""
     tmp_dir = tempfile.mkdtemp(prefix="codeautopsy_")
     clone_url = f"https://x-access-token:{token}@github.com/{repo_full_name}.git"
     subprocess.run(
@@ -26,7 +17,6 @@ def clone_repo(repo_full_name: str, token: str) -> str:
 
 
 def write_fix(repo_path: str, file_path: str, new_content: str):
-    """Overwrites the target file with the AI-generated fix."""
     full_path = os.path.join(repo_path, file_path) if not os.path.isabs(file_path) else file_path
     with open(full_path, "w", encoding="utf-8") as f:
         f.write(new_content)
@@ -53,10 +43,7 @@ def open_pull_request(repo_full_name: str, token: str, branch_name: str,
 
 def run_full_pipeline(repo_full_name: str, token: str, file_path: str,
                        fixed_content: str, pr_title: str, pr_body: str, base: str = "main"):
-    """
-    End-to-end: clone -> write fix -> branch -> commit -> push -> open PR.
-    Returns the PR URL. Cleans up the temp checkout afterward.
-    """
+
     repo_path = clone_repo(repo_full_name, token)
     try:
         write_fix(repo_path, file_path, fixed_content)

@@ -1,10 +1,3 @@
-"""
-log_analyzer.py
-----------------
-Parses build/CI error logs (Python tracebacks, pytest failures, generic
-stack traces) into structured data the rest of CodeAutopsy can act on.
-"""
-
 import re
 from dataclasses import dataclass, field
 from typing import Optional, List
@@ -32,10 +25,7 @@ PYTEST_RE = re.compile(r'FAILED (?P<file>\S+)::(?P<func>\S+)\s*-\s*(?P<etype>[\w
 
 
 def parse_log(log_text: str) -> ErrorInfo:
-    """
-    Extracts the most actionable error from a raw log string.
-    Falls back gracefully if the format isn't a classic traceback.
-    """
+
     log_text = log_text.strip()
 
     # Try pytest summary line first (common in CI output)

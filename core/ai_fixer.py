@@ -1,15 +1,3 @@
-"""
-ai_fixer.py
-------------
-Sends the error + code context to an LLM and asks for a structured
-JSON response: root cause explanation, the corrected full file content,
-and a short PR-ready summary.
-
-Uses Groq (free tier, no credit card required) with Llama 3.3 70B by
-default. Groq's API is OpenAI-compatible, so swapping providers later
-(OpenAI, Anthropic, etc.) only means changing the client + model below.
-"""
-
 import os
 import json
 from groq import Groq
@@ -60,10 +48,7 @@ def _build_user_prompt(error: ErrorInfo, context: dict) -> str:
 
 
 def generate_fix(error: ErrorInfo, context: dict, api_key: str = None) -> dict:
-    """
-    Calls the Groq API and returns a dict with keys:
-    root_cause, fix_explanation, fixed_file_content, pr_title, confidence
-    """
+
     client = Groq(api_key=api_key or os.environ.get("GROQ_API_KEY"))
 
     response = client.chat.completions.create(

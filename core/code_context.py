@@ -1,11 +1,3 @@
-"""
-code_context.py
------------------
-Given a repo checkout and an ErrorInfo, extracts the relevant source
-file (or a windowed snippet around the failing line) so the AI has
-enough context to write a real fix instead of guessing.
-"""
-
 import os
 from typing import Optional
 from .log_analyzer import ErrorInfo
@@ -14,7 +6,6 @@ MAX_FILE_CHARS = 12000  # keep prompt sizes sane for large files
 
 
 def read_file_safe(repo_path: str, relative_or_abs_path: str) -> Optional[str]:
-    """Resolves a path found in a traceback against the repo root and reads it."""
     candidates = [
         relative_or_abs_path,
         os.path.join(repo_path, relative_or_abs_path),
@@ -31,7 +22,6 @@ def read_file_safe(repo_path: str, relative_or_abs_path: str) -> Optional[str]:
 
 
 def get_windowed_snippet(file_content: str, line_number: int, window: int = 25) -> str:
-    """Returns lines [line_number - window, line_number + window] with line numbers."""
     lines = file_content.splitlines()
     start = max(0, line_number - window - 1)
     end = min(len(lines), line_number + window)
@@ -40,10 +30,7 @@ def get_windowed_snippet(file_content: str, line_number: int, window: int = 25) 
 
 
 def build_context(repo_path: str, error: ErrorInfo) -> dict:
-    """
-    Produces the full context payload passed to the AI: the file content
-    (or a windowed snippet for huge files) plus metadata about the error.
-    """
+
     context = {
         "file_path": error.file_path,
         "full_file": None,

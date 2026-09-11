@@ -1,21 +1,3 @@
-"""
-auto_fix.py
-------------
-Headless entry point used by the GitHub Actions workflow. When a CI
-run fails, this script:
-  1. Reads the failure log passed via CI_LOG_PATH (or stdin)
-  2. Parses the error
-  3. Reads the relevant source file from the current checkout
-  4. Asks Claude for a fix
-  5. Opens a Pull Request with the fix
-
-Environment variables required:
-  ANTHROPIC_API_KEY  - Claude API key
-  GITHUB_TOKEN       - token with repo scope (Actions provides this automatically)
-  GITHUB_REPOSITORY  - "owner/repo" (auto-set by GitHub Actions)
-  CI_LOG_PATH        - path to a text file containing the failing job's log
-"""
-
 import os
 import sys
 
