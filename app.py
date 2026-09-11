@@ -2,7 +2,7 @@
 CodeAutopsy - Streamlit Control Panel
 =======================================
 Live demo UI: paste a build/error log, point at a GitHub repo, watch
-Claude diagnose the bug, review the proposed fix, and (optionally)
+an AI diagnose the bug, review the proposed fix, and (optionally)
 open a real Pull Request with one click.
 
 Run locally:  streamlit run app.py
@@ -23,10 +23,10 @@ st.set_page_config(page_title="CodeAutopsy", page_icon="🩺", layout="wide")
 st.sidebar.title("🩺 CodeAutopsy")
 st.sidebar.caption("AI Bug Fixer — from stack trace to Pull Request")
 
-groq_api_key= st.sidebar.text_input(
-    "Anthropic API Key", type="password",
-    value=os.environ.get("ANTHROPIC_API_KEY", ""),
-    help="Used to call Claude for diagnosis + fix generation."
+groq_api_key = st.sidebar.text_input(
+    "Groq API Key", type="password",
+    value=os.environ.get("GROQ_API_KEY", ""),
+    help="Free at console.groq.com — used to call the AI model for diagnosis + fix generation."
 )
 github_token = st.sidebar.text_input(
     "GitHub Personal Access Token", type="password",
@@ -41,7 +41,7 @@ st.sidebar.markdown(
     "**How it works**\n"
     "1. Paste a failing build/test log\n"
     "2. CodeAutopsy locates the broken file in your repo\n"
-    "3. Claude explains the bug and writes a fix\n"
+    "3. AI explains the bug and writes a fix\n"
     "4. Review the diff, then open a real PR"
 )
 
@@ -77,7 +77,7 @@ if analyze_clicked:
     if not log_text.strip():
         st.warning("Paste an error log first.")
     elif not groq_api_key:
-        st.warning("Add your Anthropic API key in the sidebar.")
+        st.warning("Add your Groq API key in the sidebar.")
     else:
         with st.spinner("Parsing traceback..."):
             error_info = parse_log(log_text)
@@ -92,7 +92,7 @@ if analyze_clicked:
                 except Exception as e:
                     st.error(f"Could not clone repo: {e}")
 
-        with st.spinner("Asking Claude to diagnose and fix the bug..."):
+        with st.spinner("Asking the AI to diagnose and fix the bug..."):
             try:
                 result = generate_fix(error_info, context, api_key=groq_api_key)
                 result["_file_path"] = error_info.file_path
