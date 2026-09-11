@@ -1,0 +1,45 @@
+name: CodeAutopsy Auto-Fix
+
+# Fires automatically whenever your "CI" workflow finishes with a failure.
+# Rename "CI" below to match your real test/build workflow's `name:` field.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+jobs:
+  auto-fix:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Download failed run logs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run view ${{ github.event.workflow_run.id }} --log-failed > failure_log.txt || \
+          gh run view ${{ github.event.workflow_run.id }} --log > failure_log.txt
+
+      - name: Run CodeAutopsy
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          CI_LOG_PATH: failure_log.txt
+          BASE_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: python auto_fix.py

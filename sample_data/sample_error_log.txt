@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "app_under_test.py", line 21, in <module>
+    print(calculate_average(scores))
+  File "app_under_test.py", line 10, in calculate_average
+    return total / len(numbers)
+ZeroDivisionError: division by zero
