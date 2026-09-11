@@ -23,7 +23,7 @@ st.set_page_config(page_title="CodeAutopsy", page_icon="🩺", layout="wide")
 st.sidebar.title("🩺 CodeAutopsy")
 st.sidebar.caption("AI Bug Fixer — from stack trace to Pull Request")
 
-anthropic_key = st.sidebar.text_input(
+groq_api_key= st.sidebar.text_input(
     "Anthropic API Key", type="password",
     value=os.environ.get("ANTHROPIC_API_KEY", ""),
     help="Used to call Claude for diagnosis + fix generation."
@@ -76,7 +76,7 @@ if "error_info" not in st.session_state:
 if analyze_clicked:
     if not log_text.strip():
         st.warning("Paste an error log first.")
-    elif not anthropic_key:
+    elif not groq_api_key:
         st.warning("Add your Anthropic API key in the sidebar.")
     else:
         with st.spinner("Parsing traceback..."):
@@ -94,7 +94,7 @@ if analyze_clicked:
 
         with st.spinner("Asking Claude to diagnose and fix the bug..."):
             try:
-                result = generate_fix(error_info, context, api_key=anthropic_key)
+                result = generate_fix(error_info, context, api_key=groq_api_key)
                 result["_file_path"] = error_info.file_path
                 result["_original_content"] = context.get("full_file")
                 st.session_state.fix_result = result

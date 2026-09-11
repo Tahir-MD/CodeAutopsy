@@ -1,21 +1,26 @@
 """
 ai_fixer.py
 ------------
-Sends the error + code context to Claude and asks for a structured
+Sends the error + code context to an LLM and asks for a structured
 JSON response: root cause explanation, the corrected full file content,
 and a short PR-ready summary.
+
+Uses Groq (free tier, no credit card required) with Llama 3.3 70B by
+default. Groq's API is OpenAI-compatible, so swapping providers later
+(OpenAI, Anthropic, etc.) only means changing the client + model below.
 """
 
 import os
 import json
-import anthropic
+from groq import Groq
 from .log_analyzer import ErrorInfo
 
-MODEL = "claude-sonnet-4-6"
+MODEL = "llama-3.3-70b-versatile"
 
 SYSTEM_PROMPT = """You are CodeAutopsy, an expert software engineer AI that fixes build \
 and test failures. You will be given an error traceback and the relevant source file. \
-Respond ONLY with valid JSON (no markdown fences, no preamble) matching this schema:
+Respond ONLY with valid JSON (no markdown fences, no preamble, no trailing text) matching \
+this schema:
 
 {
   "root_cause": "1-3 sentence explanation of WHY the error happened",
@@ -30,6 +35,7 @@ Rules:
 - Keep the original code style/formatting conventions.
 - If you cannot confidently fix it, still return your best attempt but set confidence to "low" \
 and explain the uncertainty in fix_explanation.
+- Output raw JSON only. Do not wrap it in ```json fences.
 """
 
 
@@ -55,19 +61,23 @@ def _build_user_prompt(error: ErrorInfo, context: dict) -> str:
 
 def generate_fix(error: ErrorInfo, context: dict, api_key: str = None) -> dict:
     """
-    Calls Claude and returns a dict with keys:
+    Calls the Groq API and returns a dict with keys:
     root_cause, fix_explanation, fixed_file_content, pr_title, confidence
     """
-    client = anthropic.Anthropic(api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"))
+    client = Groq(api_key=api_key or os.environ.get("GROQ_API_KEY"))
 
-    response = client.messages.create(
+    response = client.chat.completions.create(
         model=MODEL,
         max_tokens=4000,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": _build_user_prompt(error, context)}],
+        temperature=0.2,
+        response_format={"type": "json_object"},
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": _build_user_prompt(error, context)},
+        ],
     )
 
-    raw_text = "".join(block.text for block in response.content if block.type == "text")
+    raw_text = response.choices[0].message.content
     cleaned = raw_text.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
 
     try:
