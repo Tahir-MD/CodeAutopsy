@@ -15,7 +15,7 @@ import json
 from groq import Groq
 from .log_analyzer import ErrorInfo
 
-MODEL = "llama-3.3-70b-versatile"
+MODEL = "openai/gpt-oss-120b"
 
 SYSTEM_PROMPT = """You are CodeAutopsy, an expert software engineer AI that fixes build \
 and test failures. You will be given an error traceback and the relevant source file. \
