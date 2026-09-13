@@ -9,5 +9,5 @@ def calculate_average(numbers):
     return total / len(numbers)
 
 # Example usage
-scores = []  # replace with actual scores list
+scores = [10, 20, 30, 40, 50]  # replace with actual scores list
 print(calculate_average(scores))
